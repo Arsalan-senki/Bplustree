@@ -3,8 +3,8 @@ from os import system
 from time import sleep
 splits = 0
 parent_splits = 0
-fusions = 0
-parent_fusions = 0
+merges = 0
+parent_merges = 0
 
 
 class Node(object):
@@ -57,10 +57,10 @@ class Node(object):
         else:
             del self.keys[i - 1]
 
-    def fusion(self):
-        global fusions, parent_fusions
-        fusions += 1
-        parent_fusions += 1
+    def merge(self):
+        global merges, parent_merges
+        merges += 1
+        parent_merges += 1
 
         index = self.parent.index(self.keys[0])
         # merge this node with the next node
@@ -145,9 +145,9 @@ class Leaf(Node):
         del self.keys[i]
         del self.values[i]
 
-    def fusion(self):
-        global fusions
-        fusions += 1
+    def merge(self):
+        global merges
+        merges += 1
 
         if self.next is not None and self.next.parent == self.parent:
             self.next.keys[0:0] = self.keys
@@ -251,7 +251,7 @@ class BPlusTree(object):
                     return
 
                 elif not node.borrow_key(self.minimum):
-                    node.fusion()
+                    node.merge()
                     self.delete(key, node.parent)
     
         except Exception as e :
@@ -262,6 +262,7 @@ class BPlusTree(object):
         """Prints the keys at each level."""
         if node is None:
             node = self.root
+        
         print(_prefix, "`- " if _last else "|- ", node.keys, sep="", file=file)
         _prefix += "   " if _last else "|  "
 
@@ -271,7 +272,7 @@ class BPlusTree(object):
                 self.show(child, file, _prefix, _last)
 
     def output(self):
-        return splits, parent_splits, fusions, parent_fusions, self.depth
+        return splits, parent_splits, merges, parent_merges, self.depth
 
     def readfile(self, reader):
         i = 0
